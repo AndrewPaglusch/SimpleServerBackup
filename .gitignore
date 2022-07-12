@@ -1,4 +1,4 @@
-lib/__pycache/
+lib/__pycache__/
 servers.d/*.ini
 logs/*.log
 scripts/*
