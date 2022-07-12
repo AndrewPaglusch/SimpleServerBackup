@@ -32,13 +32,12 @@ class Server:
         except Exception as ex:
             return (False, f"Error while creating remote script directory: {ex}")
 
-        ## Move rsync options to config
         rsync_command = ['rsync', '-e', f'ssh -p {self.port} {self.ssh_args}'] + \
                 ['-avPH'] + \
                 ['--delete', f"{self.connect_string}:{self.remote_path}", self.backup_dest ]
         rsync_exec = subprocess.run(rsync_command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
-    def run_pre_scripts(self, ):
+    def run_pre_scripts(self):
         pass
 
     def run_post_scripts(self):
@@ -57,9 +56,7 @@ class Server:
 
     def run_rsync(self):
         self.excludes = [ f"--exclude={ex}" for ex in self.excludes ]
-        ## move rsync options to config 
-        ## handle rsync for script copy as well
-        ## maybe move rsync a thing to a method
+        ## maybe move rsync to its own method
         rsync_command = ['rsync', '-e', f'ssh -p {self.port} {self.ssh_args}'] + \
                         ['-avPH'] + \
                         self.excludes + \
@@ -75,11 +72,9 @@ class Server:
     def log_backup_results(self, output):
         self.logfile = f"logs/{self.host}_{self.starttime}.log"
 
-        # write rsync output to logfile
         self.logging.info(f"Saving rsync output for {self.host} to {self.logfile}")
         f = open(self.logfile, 'w')
         f.write(output)
-        #write to logfile print to console
         self.logging.debug(f"Finished saving rsync output for {self.host} to {self.logfile}")
 
     def start(self):
