@@ -7,11 +7,10 @@ Start is the main method available to the user.
 """
 
 __author__ = "Andrew Paglusch"
-__version__ = "0.1.0"
 __license__ = "MIT"
 
 class Server:
-    def __init__(self, server_host, server_config, logging):
+    def __init__(self, logging, server_host, server_config):
         self.logging = logging
         self.host = server_host # web01.whatever.com
         self.username = server_config['username'] # root

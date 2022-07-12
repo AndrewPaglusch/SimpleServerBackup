@@ -7,8 +7,7 @@ from pprint import pprint
 import subprocess
 import logging
 import datetime
-from lib import Server
-Server = Server.Server
+from lib.Server import Server
 def load_main_config():
     """load main config from disk"""
     cp = ConfigParser()
@@ -59,7 +58,7 @@ def main():
         backup_futures = {}
         for server_host, server_config in server_configs.items():
             logging.debug(f"Adding {server_host} to thread pool")
-            s = Server(server_host, server_config, logging)
+            s = Server(logging, server_host, server_config)
             backup_futures[ex.submit(s.start)] = server_host
 
         for future in futures.as_completed(backup_futures):
