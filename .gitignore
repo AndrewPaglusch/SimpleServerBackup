@@ -1,5 +1,7 @@
 lib/__pycache__/
 servers.d/*.ini
+scripts.d/*
 logs/*.log
 scripts/*
 backups/*
+*env
