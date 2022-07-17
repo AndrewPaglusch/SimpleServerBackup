@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import subprocess
-import datetime
+import datetime, json
 """
 Server Class for SimpleServerBackup
 Start is the main method available to the user.
@@ -22,12 +22,19 @@ class Backup:
         self.excludes = [ f"--exclude={ex}" for ex in server_config['excludes'] ]
         self.backup_dest = 'backups/' + server_host + '/' # backups/web01.whatever.com/
         self.logfile = f"logs/{self.host}_{self.starttime}.log" if logfile == 'TBD' else logfile
-        self.rsync_cmd = ['rsync', '-e', f'ssh -p {self.port} {self.ssh_args}', '-avPHS', '--delete'] + self.excludes
+        self.build_rsync_cmd()
+        self.scripts_remote_location = server_config['scripts_location']
+        self.scripts_dir = scripts_dir + "/" + server_host + "/"
         # will be updated to True after pre/post scripts have been synced to host
         self.script_deployed = False
 
-    def deploy_scripts(self, scripts):
-        pass
+    def build_rsync_cmd(self):
+        self.rsync_cmd = ['rsync', '-e', f'ssh -p {self.port} {self.ssh_args}', '-avPHS', '--delete'] + self.excludes
+
+    def deploy_scripts(self):
+        res = self.__run_rsync__(self.scripts_remote_location, self.scripts_dir, direction='to_remote')
+        if res['return_code'] == 0:
+            self.script_deployed = True
 
     def __run_rsync__(self, remote_dest, local_dest, direction='from_remote'):
         rsync_cmd = self.rsync_cmd
@@ -38,6 +45,7 @@ class Backup:
             rsync_cmd.append(local_dest)
             rsync_cmd.append(f"{self.connect_string}:{remote_dest}")
         rsync_exec = subprocess.run(rsync_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        self.build_rsync_cmd()
         return({ 'return_code': rsync_exec.returncode,
              'output': rsync_exec.stdout.decode("utf-8") or b"" })
 
@@ -68,7 +76,8 @@ class Backup:
         self.logging.info(f"Backup started for {self.host}")
 
         # deploy pre/post scripts
-        #self.deploy_scripts()
+        self.logging.info(f"Syncing scripts to remoted server")
+        self.deploy_scripts()
 
         # run pre-scripts
         # run_pre_scripts()
