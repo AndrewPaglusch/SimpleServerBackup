@@ -44,3 +44,7 @@ class ssbConfig:
         for config_file in config_files:
             self.logging.debug(f"Loading config file {config_file} from disk")
             self.load_server_config(config_file)
+
+    def load_all_scripts(self):
+        script_servers = Path(self.config['scripts_directory']).glob()
+

@@ -21,7 +21,7 @@ def main():
         backup_futures = {}
         for server_host, server_config in config['server_configs'].items():
             logging.debug(f"Adding {server_host} to thread pool")
-            s = Backup(logging, server_host, server_config)
+            s = Backup(logging, server_host, server_config, config['scripts_directory'])
             backup_futures[ex.submit(s.start)] = server_host
 
         for future in futures.as_completed(backup_futures):

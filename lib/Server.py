@@ -10,7 +10,7 @@ __author__ = "Andrew Paglusch"
 __license__ = "MIT"
 
 class Backup:
-    def __init__(self, logging, server_host, server_config, logfile='TBD'):
+    def __init__(self, logging, server_host, server_config, scripts_dir, logfile='TBD'):
         self.starttime = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
         self.logging = logging
         self.host = server_host # web01.whatever.com
