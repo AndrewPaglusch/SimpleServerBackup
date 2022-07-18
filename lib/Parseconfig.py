@@ -10,11 +10,11 @@ class SSBConfig:
         self.logging = logging
         self.cp = ConfigParser()
         self.cp.read(configfile)
-        self.config = self.normalize_config()
-        self.load_all_server_config()
-        self.load_all_scripts()
+        self.config = self._normalize_config()
+        self._load_all_server_config()
+        self._load_all_scripts()
 
-    def normalize_config(self):
+    def _normalize_config(self):
         """load main config from disk"""
         config = {
             'concurrency':       self.cp.getint('main', 'concurrency', fallback=1),
@@ -25,7 +25,7 @@ class SSBConfig:
         }
         return config
 
-    def load_server_config(self, filepath):
+    def _load_server_config(self, filepath):
         sc = ConfigParser()
         sc.read(filepath)
         try:
@@ -40,36 +40,35 @@ class SSBConfig:
         except Exception:
             self.logging.error(f"Unable to load {filepath} due to {Exception}")
 
-    def load_all_server_config(self):
+    def _load_all_server_config(self):
         """load server configs from disk"""
         config_files = Path(self.config['server_directory']).glob('*.ini')
         for config_file in config_files:
             self.logging.debug(f"Loading config file {config_file} from disk")
-            self.load_server_config(config_file)
+            self._load_server_config(config_file)
 
-    def load_all_scripts(self):
+    def _load_all_scripts(self):
         script_servers = Path(self.config['scripts_directory']).glob('*')
         for server in script_servers:
-            if not self.verify_script_to_server(server):
+            if not self._verify_script_to_server(server):
                 continue
             files = []
             for file in server.iterdir():
                 files.append(file.parts[-1])
-            pre, post = self.sort_files(files)
+            pre, post = self._sort_files(files)
             self.config['scripts_configs'][server.parts[-1]] = {}
             self.config['scripts_configs'][server.parts[-1]]['pre'] = pre
             self.config['scripts_configs'][server.parts[-1]]['post'] = post
 
-    def sort_files(self, files):
-        pre = []
-        post = []
+    def _sort_files(self, files):
+        pre, post = [], []
         [ pre.append(file) for file in files if file.startswith('pre') ]
         [ post.append(file) for file in files if file.startswith('post') ]
         pre.sort()
         post.sort()
         return pre, post
 
-    def verify_script_to_server(self, server):
+    def _verify_script_to_server(self, server):
         if not server.is_dir():
             self.logging.info(f"{server.parts} is not a directory")
             return False

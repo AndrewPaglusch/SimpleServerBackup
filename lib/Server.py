@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import subprocess
-import datetime, json
+import datetime
 """
 Server Class for SimpleServerBackup
 Start is the main method available to the user.
@@ -12,15 +12,14 @@ __license__ = "MIT"
 class Backup:
     def __init__(self, logging, server_host, server_config, scripts_dir, logfile='TBD'):
         self.starttime = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+        self.host = server_host
         self._parse_serverconfig(server_config)
         self.logging = logging
-        self.host = server_host # web01.whatever.com
         self.connect_string = f"{self.username}@{self.host}" # root@web01.whatever.com
         self.backup_dest = 'backups/' + server_host + '/' # backups/web01.whatever.com/
         self.logfile = f"logs/{self.host}_{self.starttime}.log" if logfile == 'TBD' else logfile
         self._build_rsync_cmd()
         self.scripts_dir = scripts_dir + "/" + server_host + "/"
-        # will be updated to True after pre/post scripts have been synced to host
         self.script_deployed = False
 
     def _parse_serverconfig(self, server_config):
@@ -83,9 +82,7 @@ class Backup:
         self._deploy_scripts()
 
         # run pre-scripts
-        # run_pre_scripts()
 
-        # run the backup
         rsync_results = self._run_rsync(remote_dest=self.remote_path, local_dest=self.backup_dest)
         self._log_backup_results(rsync_results['output'])
 
