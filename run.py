@@ -5,16 +5,16 @@ import subprocess
 import logging
 import datetime
 from lib.Server import Backup
-from lib.ssbArgs import ssbArgs
-from lib.Parseconfig import ssbConfig
+from lib.SSBArgs import SSBArgs
+from lib.Parseconfig import SSBConfig
 
 def main():
     logging.basicConfig(stream=sys.stdout,
         level=logging.INFO,
         format='%(asctime)s (%(levelname)s) - %(message)s',
         datefmt='%Y-%m-%dT%H:%M:%SZ')
-    args   = ssbArgs(logging).args
-    config = ssbConfig(args.config, logging).config
+    args   = SSBArgs(logging).args
+    config = SSBConfig(args.config, logging).config
 
     # build and start thread pool
     with futures.ThreadPoolExecutor(max_workers=config['concurrency']) as ex:
@@ -22,7 +22,7 @@ def main():
         for server_host, server_config in config['server_configs'].items():
             logging.debug(f"Adding {server_host} to thread pool")
             s = Backup(logging, server_host, server_config, config['scripts_directory'])
-            backup_futures[ex.submit(s.start)] = server_host
+            backup_futures[ex.submit(s.start_backup)] = server_host
 
         for future in futures.as_completed(backup_futures):
             # Iterate over futures as they complete

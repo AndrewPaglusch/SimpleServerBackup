@@ -5,7 +5,7 @@ from pathlib import Path
 Configuration Parser for SimpleServerBackup
 """
 
-class ssbConfig:
+class SSBConfig:
     def __init__(self, configfile, logging):
         self.logging = logging
         self.cp = ConfigParser()
