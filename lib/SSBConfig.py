@@ -8,7 +8,7 @@ Configuration Parser for SimpleServerBackup
 
 class SSBConfig:
     def __init__(self, configfile, logging):
-        self.logging = logging
+        self.log = logging.getLogger('ssb')
         self.cp = ConfigParser()
         self.configfile = configfile
 
@@ -43,13 +43,13 @@ class SSBConfig:
                'scripts_location':  sc.get('main', 'scripts_remote_location', fallback="/tmp")
             }
         except KeyError as ke:
-            self.logging.Exception(f"Unable to load {filepath} due to malformed configuration")
+            self.log.Exception(f"Unable to load {filepath} due to malformed configuration")
 
     def _load_all_server_config(self):
         """load server configs from disk"""
         config_files = Path(self.config['server_directory']).glob('*.ini')
         for config_file in config_files:
-            self.logging.debug(f"Loading config file {config_file} from disk")
+            self.log.debug(f"Loading config file {config_file} from disk")
             self._load_server_config(config_file)
 
     def _load_all_scripts(self):
@@ -74,10 +74,10 @@ class SSBConfig:
 
     def _verify_script_to_server(self, server):
         if not server.is_dir():
-            self.logging.info(f"{server.parts[-1]} is not a directory")
+            self.log.info(f"{server.parts[-1]} is not a directory")
             return False
         hostname = server.parts[-1]
         if hostname not in self.config['server_configs'].keys():
-            self.logging.info(f"{hostname} has no scripts - no pre/post scripts will be ran.")
+            self.log.info(f"{hostname} has no scripts - no pre/post scripts will be ran.")
             return False
         return True

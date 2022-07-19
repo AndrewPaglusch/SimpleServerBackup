@@ -13,6 +13,7 @@ def main():
         level=logging.INFO,
         format='%(asctime)s (%(levelname)s) - %(message)s',
         datefmt='%Y-%m-%dT%H:%M:%SZ')
+    log = logging.getLogger('ssb')
     args   = SSBArgs().get_args()
     config = SSBConfig(args.config, logging).get_config()
 
@@ -20,7 +21,7 @@ def main():
     with futures.ThreadPoolExecutor(max_workers=config['concurrency']) as ex:
         backup_futures = {}
         for server_host, server_config in config['server_configs'].items():
-            logging.debug(f"Adding {server_host} to thread pool")
+            log.debug(f"Adding {server_host} to thread pool")
             s = Backup(logging, server_host, server_config, config['scripts_directory'])
             backup_futures[ex.submit(s.start_backup)] = server_host
 
@@ -35,11 +36,11 @@ def main():
             try:
                 success, message = future.result()
                 if success:
-                    logging.info(f"{server_host}: {message}")
+                    log.info(f"{server_host}: {message}")
                 else:
-                    logging.error(f"{server_host}: {message}")
+                    log.error(f"{server_host}: {message}")
             except Exception:
-                    logging.exception(f"{server_host}: An exception was hit while running backups")
+                    log.exception(f"{server_host}: An exception was hit while running backups")
 
 if __name__ == '__main__':
    main()
