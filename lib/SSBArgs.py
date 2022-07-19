@@ -18,5 +18,5 @@ class SSBArgs:
         self.args, self.unknown = self.parser.parse_known_args()
         self.check_args()
 
-    def check_args(self):
+    def _check_args(self):
        pass
