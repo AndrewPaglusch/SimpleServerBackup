@@ -16,7 +16,7 @@ class SSBArgs:
         self.optional = self.parser.add_argument_group('optional arguments')
         self.optional.add_argument("-c", "--config", default='config.ini', help="Main configuration file in ini format - see example")
         self.args, self.unknown = self.parser.parse_known_args()
-        self.check_args()
+        self._check_args()
 
     def _check_args(self):
        pass
