@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 import argparse
-try:
-   from lib.Parseconfig import SSBConfig
-except:
-   import Parseconfig
+
 class SSBArgs:
     '''
     class to handle arguement parsing for a more elegant
