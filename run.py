@@ -6,7 +6,7 @@ import logging
 import datetime
 from lib.Server import Backup
 from lib.SSBArgs import SSBArgs
-from lib.Parseconfig import SSBConfig
+from lib.SSBConfig import SSBConfig
 
 def main():
     logging.basicConfig(stream=sys.stdout,
