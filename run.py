@@ -8,7 +8,7 @@ import lib
 
 def main():
     log = lib.log
-    args   = lib.SSBArgs().get_args()
+    args   = lib.SSBArgs(log).get_args()
     config = lib.SSBConfig(args.config, lib.logging).get_config()
 
     # build and start thread pool
