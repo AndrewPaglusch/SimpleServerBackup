@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import json, sys, os, argparse
+import argparse
 try:
    from lib.Parseconfig import SSBConfig
 except:
@@ -9,11 +9,10 @@ class SSBArgs:
     class to handle arguement parsing for a more elegant
     soultion to options handling
     '''
-    def __init__(self, logging):
+    def __init__(self):
         '''
         overload the required/ optional options here
         '''
-        self.logging = logging
         self.parser = argparse.ArgumentParser()
         self.parser._action_groups.pop()
         self.required = self.parser.add_argument_group('required arguments')
