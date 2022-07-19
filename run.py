@@ -4,7 +4,7 @@ from concurrent import futures
 import subprocess
 import logging
 import datetime
-from lib.Server import Backup
+from lib.Backup import Backup
 from lib.SSBArgs import SSBArgs
 from lib.SSBConfig import SSBConfig
 
