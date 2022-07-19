@@ -74,10 +74,10 @@ class SSBConfig:
 
     def _verify_script_to_server(self, server):
         if not server.is_dir():
-            self.log.info(f"{server.parts[-1]} is not a directory")
+            self.log.warn(f"{server.parts[-1]} is not a directory")
             return False
         hostname = server.parts[-1]
         if hostname not in self.config['server_configs'].keys():
-            self.log.info(f"{hostname} has no scripts - no pre/post scripts will be ran.")
+            self.log.warn(f"{hostname} has no scripts - no pre/post scripts will be ran.")
             return False
         return True
