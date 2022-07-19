@@ -13,7 +13,6 @@ class SSBConfig:
         self.config = self._normalize_config()
         self._load_all_server_config()
         self._load_all_scripts()
-        return self.config
 
     def _normalize_config(self):
         """load main config from disk"""
@@ -58,6 +57,9 @@ class SSBConfig:
             self.config['scripts_configs'][server.parts[-1]] = {}
             self.config['scripts_configs'][server.parts[-1]]['pre'] = pre
             self.config['scripts_configs'][server.parts[-1]]['post'] = post
+
+    def get_config(self):
+        return self.config
 
     def _sort_files(self, files):
         pre  = sorted([ file for file in files if file.startswith('pre') ])

@@ -13,8 +13,8 @@ def main():
         level=logging.INFO,
         format='%(asctime)s (%(levelname)s) - %(message)s',
         datefmt='%Y-%m-%dT%H:%M:%SZ')
-    args   = SSBArgs().args
-    config = SSBConfig(args.config, logging)
+    args   = SSBArgs().get_args()
+    config = SSBConfig(args.config, logging).get_config()
 
     # build and start thread pool
     with futures.ThreadPoolExecutor(max_workers=config['concurrency']) as ex:

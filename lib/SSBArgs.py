@@ -19,4 +19,7 @@ class SSBArgs:
         self._check_args()
 
     def _check_args(self):
-       pass
+        pass
+
+    def get_args(self):
+        return self.args
