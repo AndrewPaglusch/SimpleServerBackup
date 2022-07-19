@@ -4,13 +4,13 @@ from concurrent import futures
 import subprocess
 import logging
 import datetime
+
 import lib
 
 def main():
     log = lib.log
     args   = lib.SSBArgs(log).get_args()
     config = lib.SSBConfig(args.config, lib.logging).get_config()
-
     # build and start thread pool
     with futures.ThreadPoolExecutor(max_workers=config['concurrency']) as ex:
         backup_futures = {}

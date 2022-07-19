@@ -74,6 +74,7 @@ class SSBConfig:
 
     def _verify_script_to_server(self, server):
         if not server.is_dir():
+
             self.log.warn(f"{server.parts[-1]} is not a directory")
             return False
         hostname = server.parts[-1]
