@@ -13,6 +13,7 @@ class SSBConfig:
         self.config = self._normalize_config()
         self._load_all_server_config()
         self._load_all_scripts()
+        return self.config
 
     def _normalize_config(self):
         """load main config from disk"""
