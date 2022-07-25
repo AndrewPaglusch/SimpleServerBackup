@@ -1,22 +1,22 @@
 #!/usr/bin/env python3
-import sys
 from concurrent import futures
-import subprocess
-import logging
-import datetime
 import lib
 
 def main():
     log = lib.log
     args   = lib.SSBArgs(log).get_args()
     config = lib.SSBConfig(args.config, lib.logging).get_config()
-
     # build and start thread pool
     with futures.ThreadPoolExecutor(max_workers=config['concurrency']) as ex:
         backup_futures = {}
         for server_host, server_config in config['server_configs'].items():
+            try:
+                scripts = config['scripts_configs'][server_host]
+            except:
+                scripts = None
             log.debug(f"Adding {server_host} to thread pool")
-            s = lib.Backup(lib.logging, server_host, server_config, config['scripts_directory'])
+            log.debug(f"{config['scripts_configs']} passed to class")
+            s = lib.Backup(lib.logging, server_host, server_config, config['scripts_directory'], scripts)
             backup_futures[ex.submit(s.start_backup)] = server_host
 
         for future in futures.as_completed(backup_futures):
