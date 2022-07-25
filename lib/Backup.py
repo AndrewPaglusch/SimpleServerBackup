@@ -84,6 +84,7 @@ class Backup:
             sshcmd = ['ssh', self.ssh_args, '-p', self.port, self.connect_string, script]
         self.log.debug(f"attempting to run {sshcmd}")
         results = subprocess.run(sshcmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        self._log_to_file(f"{script} results are :\n {results.stdout.decode('utf-8')} \n" or "No Output")
         return({'return_code': results.returncode,
               'output': results.stdout.decode("utf-8") or b"" })
 
@@ -95,14 +96,14 @@ class Backup:
             raise Exception(f"Remote command resulted in a non-zero return code: {cmd.returncode}. Command output: {output}")
         return output.decode("utf-8")
 
-    def _log_backup_results(self, output):
-        self.log.info(f"Saving rsync output for {self.host} to {self.logfile}")
-        f = open(self.logfile, 'w')
-        f.write(output)
+    def _log_to_file(self, output):
+        self.log.debug(f"Saving rsync output for {self.host} to {self.logfile}")
+        with open(self.logfile, 'a') as f:
+            f.write(output)
         self.log.debug(f"Finished saving rsync output for {self.host} to {self.logfile}")
 
     def start_backup(self):
-        self.log.info(f"Backup started for {self.host}")
+        self.log.info(f"Backup started for {self.host} logfile located {self.logfile}")
 
         # deploy pre/post scripts
         self.log.info(f"Syncing pre-post scripts to {self.host} ")
@@ -112,8 +113,9 @@ class Backup:
         self._run_pre_scripts()
         if self.pre_script_failed == True:
             return (False, f"Pre scripts failed for {self.host} will not continue")
+        self.log.info(f"Starting backup for {self.host}")
         rsync_results = self._run_rsync(remote_dest=self.remote_path, local_dest=self.backup_dest)
-        self._log_backup_results(rsync_results['output'])
+        self._log_to_file(rsync_results['output'])
 
         # run post-scripts
         self._run_post_scripts()
