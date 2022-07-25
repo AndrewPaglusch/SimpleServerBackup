@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import subprocess
+import sys
 import datetime
 """
 Server Class for SimpleServerBackup
@@ -10,7 +11,8 @@ __author__ = "Andrew Paglusch"
 __license__ = "MIT"
 
 class Backup:
-    def __init__(self, logging, server_host, server_config, scripts_dir, logfile='TBD'):
+    def __init__(self, logging, server_host, server_config, scripts_dir, scripts, logfile='TBD'):
+        self.scripts = scripts
         self.starttime = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
         self.host = server_host
         self._parse_serverconfig(server_config)
@@ -28,7 +30,7 @@ class Backup:
         self.ssh_args = ' '.join(server_config['ssh_args'])
         self.excludes = [ f"--exclude={ex}" for ex in server_config['excludes'] ]
         self.remote_path = server_config['remote_path']
-        self.scripts_remote_location = server_config['scripts_location']
+        self.scripts_remote_location = server_config['scripts_location'] + '/'
 
     def _build_rsync_cmd(self):
         self.rsync_cmd = ['rsync', '-e', f'ssh -p {self.port} {self.ssh_args}', '-avPHS', '--delete'] + self.excludes
@@ -52,13 +54,39 @@ class Backup:
              'output': rsync_exec.stdout.decode("utf-8") or b"" })
 
     def _run_pre_scripts(self):
-        pass
+        self.log.debug(f"Starting pre-scripts using config {self.scripts}")
+        for pre_script in self.scripts['pre']:
+            result = self._run_script( self.scripts_remote_location + pre_script, None)
+            if result['return_code'] != 0:
+                self.log.error(f"{pre_script} had nonzero return code! output was: \n {result['output']}")
+                self.pre_script_failed = True
+                break
+            else:
+                self.log.info(f"{pre_script} completed on {self.host}")
+        self.pre_script_failed = False
 
     def _run_post_scripts(self):
-        pass
+        self.log.debug(f"Starting post-scripts using config {self.scripts}")
+        for post_script in self.scripts['post']:
+            result = self._run_script( self.scripts_remote_location + post_script, None)
+            if result['return_code'] != 0:
+                self.log.error(f"{post_script} had a nonzero return code! output was: \n {result['output']}")
+                self.post_script_failed = True
+                break
+            else:
+                self.log.info(f"{post_script} completed on {self.host}")
+        self.post_script_failed = False
 
-    def _clean_scripts(self):
-        pass
+    def _run_script(self, script, options):
+        self.log.debug(f"running script: {script} on {self.host}")
+        if self.ssh_args == '':
+            sshcmd = ['ssh', '-p', self.port, self.connect_string, script]
+        else:
+            sshcmd = ['ssh', self.ssh_args, '-p', self.port, self.connect_string, script]
+        self.log.debug(f"attempting to run {sshcmd}")
+        results = subprocess.run(sshcmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        return({'return_code': results.returncode,
+              'output': results.stdout.decode("utf-8") or b"" })
 
     def _run_single_remote_cmd(self, command):
         ssh_command = ['ssh', '-p', self.port, self.connect_string, command]
@@ -82,10 +110,16 @@ class Backup:
         self._deploy_scripts()
 
         # run pre-scripts
-
+        self._run_pre_scripts()
+        if self.pre_script_failed == True:
+            return (False, f"Pre scripts failed for {self.host} will not continue")
         rsync_results = self._run_rsync(remote_dest=self.remote_path, local_dest=self.backup_dest)
         self._log_backup_results(rsync_results['output'])
 
+        # run post-scripts
+        self._run_post_scripts()
+        if self.post_script_failed == True:
+            return (False, f"Post scripts failed for {self.host} will not continue")
         # TODO: Simply checking the return code of rsync
         # won't be enough to determine if a backup failed or not.
         # We will also need to consider the success of all pre/post scripts
